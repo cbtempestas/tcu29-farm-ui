@@ -26,10 +26,11 @@
             padding: 30px 0 20px;
         }
         .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 12px;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 16px;
             object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(184, 115, 51, 0.3));
         }
         header h1 {
             font-size: 1.8rem;
@@ -160,48 +161,24 @@
             color: #92400e;
             margin-top: 2px;
         }
-        .chart-preview {
-            display: block;
+        .price-chart-container {
             margin-top: 12px;
-            border-radius: 8px;
-            overflow: hidden;
             background: #fff;
-            text-decoration: none;
-            position: relative;
-            min-height: 80px;
+            border-radius: 8px;
+            padding: 12px;
         }
-        .chart-preview img {
+        .price-chart-container canvas {
             width: 100%;
-            height: auto;
+            height: 120px;
             display: block;
         }
-        .chart-preview .chart-fallback {
+        .chart-labels {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            gap: 8px;
-            color: #b87333;
-            font-weight: 500;
-        }
-        .chart-preview .chart-fallback span:first-child {
-            font-size: 2rem;
-        }
-        .chart-preview .chart-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(transparent, rgba(184, 115, 51, 0.9));
-            color: #fff;
-            text-align: center;
-            padding: 16px 12px 12px;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .chart-preview:hover .chart-overlay {
-            background: linear-gradient(transparent, rgba(184, 115, 51, 1));
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #92400e;
+            margin-top: 4px;
+            opacity: 0.7;
         }
         .why-section {
             display: grid;
@@ -452,14 +429,13 @@
                 <span class="copper-price-value" id="copper-price">$---.--</span>
                 <span class="copper-price-change up" id="copper-change">per lb</span>
             </div>
-            <a href="https://www.google.com/finance/quote/HGW00:COMEX?hl=en" target="_blank" class="chart-preview">
-                <img src="https://www.gstatic.com/finance/chart/HGW00_COMEX_1Y.png" alt="Copper Price Chart" onerror="this.style.display='none'; this.parentElement.querySelector('.chart-fallback').style.display='flex';">
-                <div class="chart-fallback" style="display:none;">
-                    <span>📈</span>
-                    <span>View 1-Year Copper Chart</span>
+            <div class="price-chart-container">
+                <canvas id="price-chart" width="400" height="120"></canvas>
+                <div class="chart-labels">
+                    <span id="chart-start-date">--</span>
+                    <span id="chart-end-date">--</span>
                 </div>
-                <div class="chart-overlay">View Live Chart →</div>
-            </a>
+            </div>
         </div>
 
         <div class="why-section">
@@ -562,7 +538,8 @@
         // ABIs
         const PRICE_ORACLE_ABI = [
             "function getPrice() view returns (uint256)",
-            "function getLastUpdateTime() view returns (uint256)"
+            "function getLastUpdateTime() view returns (uint256)",
+            "function getPriceHistory(uint256 count) view returns (uint256[] prices, uint256[] timestamps)"
         ];
 
         const FARM_ABI = [
@@ -600,24 +577,112 @@
         async function init() {
             await Promise.all([
                 updateFarmStats(),
-                updateCopperPrice()
+                updateCopperData()
             ]);
             setInterval(updateFarmStats, 30000);
-            setInterval(updateCopperPrice, 60000);
+            setInterval(updateCopperData, 300000); // Update every 5 mins
         }
 
-        // Update copper price from oracle
-        async function updateCopperPrice() {
+        // Update copper price and chart from oracle
+        async function updateCopperData() {
             try {
                 const readProvider = new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
                 const priceOracle = new ethers.Contract(PRICE_ORACLE_ADDRESS, PRICE_ORACLE_ABI, readProvider);
 
-                const price = await priceOracle.getPrice();
-                const priceFormatted = parseFloat(ethers.formatUnits(price, 18)).toFixed(2);
+                // Get current price and history
+                const [price, history] = await Promise.all([
+                    priceOracle.getPrice(),
+                    priceOracle.getPriceHistory(30) // Get last 30 data points
+                ]);
 
+                const priceFormatted = parseFloat(ethers.formatUnits(price, 18)).toFixed(2);
                 document.getElementById('copper-price').textContent = '$' + priceFormatted;
+
+                // Draw the chart
+                drawPriceChart(history.prices, history.timestamps);
             } catch (error) {
-                console.error('Failed to fetch copper price:', error);
+                console.error('Failed to fetch copper data:', error);
+            }
+        }
+
+        // Draw price chart on canvas
+        function drawPriceChart(prices, timestamps) {
+            const canvas = document.getElementById('price-chart');
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas resolution for sharp rendering
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = rect.width;
+            const height = rect.height;
+            const padding = { top: 10, right: 10, bottom: 10, left: 10 };
+
+            // Convert prices to numbers
+            const priceData = prices.map(p => parseFloat(ethers.formatUnits(p, 18)));
+            const timeData = timestamps.map(t => Number(t));
+
+            if (priceData.length < 2) return;
+
+            // Find min/max for scaling
+            const minPrice = Math.min(...priceData) * 0.995;
+            const maxPrice = Math.max(...priceData) * 1.005;
+            const priceRange = maxPrice - minPrice || 1;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
+            gradient.addColorStop(0, 'rgba(184, 115, 51, 0.15)');
+            gradient.addColorStop(1, 'rgba(184, 115, 51, 0.02)');
+
+            // Calculate points
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+            const points = priceData.map((price, i) => ({
+                x: padding.left + (i / (priceData.length - 1)) * chartWidth,
+                y: padding.top + chartHeight - ((price - minPrice) / priceRange) * chartHeight
+            }));
+
+            // Draw filled area
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, height - padding.bottom);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.lineTo(points[points.length - 1].x, height - padding.bottom);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Draw line
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            points.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.strokeStyle = '#b87333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw current price dot
+            const lastPoint = points[points.length - 1];
+            ctx.beginPath();
+            ctx.arc(lastPoint.x, lastPoint.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#b87333';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(lastPoint.x, lastPoint.y, 6, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(184, 115, 51, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Update date labels
+            if (timeData.length > 0) {
+                const startDate = new Date(timeData[0] * 1000);
+                const endDate = new Date(timeData[timeData.length - 1] * 1000);
+                document.getElementById('chart-start-date').textContent = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                document.getElementById('chart-end-date').textContent = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             }
         }
 
