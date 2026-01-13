@@ -414,8 +414,8 @@
                 </a>
             </div>
             <div class="copper-price">
-                <span class="copper-price-value" id="copper-price">$4.21</span>
-                <span class="copper-price-change up" id="copper-change">+23% YTD</span>
+                <span class="copper-price-value" id="copper-price">$---.--</span>
+                <span class="copper-price-change up" id="copper-change">per lb</span>
             </div>
             <p style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
                 Copper demand is surging from AI data centers and EV production. TCu29 tokens are backed 1:1 by physical copper reserves.
@@ -527,8 +527,14 @@
         const FARM_ADDRESS = "0x7Fe0EDcCd50A704D78EdA999607CA9B61BCafD0A";
         const LP_TOKEN_ADDRESS = "0xC4A13D9C061bb6FC254cc31d4737C6d5427B3aa8";
         const USDT_ADDRESS = "0x55d398326f99059fF775485246999027B3197955";
+        const PRICE_ORACLE_ADDRESS = "0x0F7b4081E023d5962A7CeA0C3530D5deb016779e";
 
         // ABIs
+        const PRICE_ORACLE_ABI = [
+            "function getPrice() view returns (uint256)",
+            "function getLastUpdateTime() view returns (uint256)"
+        ];
+
         const FARM_ABI = [
             "function deposit(uint256 pid, uint256 amount) external",
             "function withdraw(uint256 pid, uint256 amount) external",
@@ -562,8 +568,27 @@
 
         // Initialize
         async function init() {
-            await updateFarmStats();
+            await Promise.all([
+                updateFarmStats(),
+                updateCopperPrice()
+            ]);
             setInterval(updateFarmStats, 30000);
+            setInterval(updateCopperPrice, 60000);
+        }
+
+        // Update copper price from oracle
+        async function updateCopperPrice() {
+            try {
+                const readProvider = new ethers.JsonRpcProvider('https://bsc-dataseed.binance.org/');
+                const priceOracle = new ethers.Contract(PRICE_ORACLE_ADDRESS, PRICE_ORACLE_ABI, readProvider);
+
+                const price = await priceOracle.getPrice();
+                const priceFormatted = parseFloat(ethers.formatUnits(price, 18)).toFixed(2);
+
+                document.getElementById('copper-price').textContent = '$' + priceFormatted;
+            } catch (error) {
+                console.error('Failed to fetch copper price:', error);
+            }
         }
 
         // Connect wallet
