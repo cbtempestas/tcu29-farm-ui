@@ -26,18 +26,10 @@
             padding: 30px 0 20px;
         }
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             margin: 0 auto 12px;
-            background: linear-gradient(135deg, #b87333, #cd7f32);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(184, 115, 51, 0.3);
+            object-fit: contain;
         }
         header h1 {
             font-size: 1.8rem;
@@ -167,6 +159,32 @@
             font-size: 0.75rem;
             color: #92400e;
             margin-top: 2px;
+        }
+        .copper-chart {
+            margin-top: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+        }
+        .copper-chart iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+        }
+        .chart-link {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            background: #fff;
+            border-radius: 8px;
+            color: #b87333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+        .chart-link:hover {
+            background: #fef3e2;
         }
         .why-section {
             display: grid;
@@ -389,7 +407,7 @@
 <body>
     <div class="container">
         <header>
-            <div class="logo">TCu</div>
+            <img class="logo" src="https://www.tcu29.io/lovable-uploads/StandingTCu29.png" alt="TCu29">
             <h1>TCu29 <span>Farm</span></h1>
             <p>Stake LP Tokens - Earn Real Yield</p>
         </header>
@@ -417,19 +435,16 @@
                 <span class="copper-price-value" id="copper-price">$---.--</span>
                 <span class="copper-price-change up" id="copper-change">per lb</span>
             </div>
-            <p style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
-                Copper demand is surging from AI data centers and EV production. TCu29 tokens are backed 1:1 by physical copper reserves.
-            </p>
-            <div class="copper-stats">
-                <div class="copper-stat">
-                    <div class="copper-stat-value">16.2M tons</div>
-                    <div class="copper-stat-label">2030 Supply Deficit</div>
+            <div class="copper-chart">
+                <!-- TradingView Widget BEGIN -->
+                <div class="tradingview-widget-container">
+                    <div id="tradingview-widget"></div>
                 </div>
-                <div class="copper-stat">
-                    <div class="copper-stat-value">3.8x</div>
-                    <div class="copper-stat-label">AI Demand Multiplier</div>
-                </div>
+                <!-- TradingView Widget END -->
             </div>
+            <a href="https://www.google.com/finance/quote/HGW00:COMEX?hl=en" target="_blank" class="chart-link">
+                View Full Chart on Google Finance →
+            </a>
         </div>
 
         <div class="why-section">
@@ -824,6 +839,28 @@
 
         // Start
         init();
+
+        // TradingView Widget
+        function loadTradingViewWidget() {
+            const script = document.createElement('script');
+            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+            script.async = true;
+            script.innerHTML = JSON.stringify({
+                "symbol": "COMEX:HG1!",
+                "width": "100%",
+                "height": "200",
+                "locale": "en",
+                "dateRange": "12M",
+                "colorTheme": "light",
+                "isTransparent": true,
+                "autosize": true,
+                "largeChartUrl": "https://www.google.com/finance/quote/HGW00:COMEX?hl=en",
+                "noTimeScale": false,
+                "chartOnly": true
+            });
+            document.getElementById('tradingview-widget').appendChild(script);
+        }
+        loadTradingViewWidget();
     </script>
 </body>
 </html>
