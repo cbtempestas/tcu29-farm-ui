@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCu29 Farm | Stake LP, Earn USDT</title>
+    <title>TCu29 Farm | Copper-Backed Yield</title>
     <style>
         * {
             margin: 0;
@@ -12,121 +12,197 @@
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #1e3a5f;
         }
         .container {
-            max-width: 480px;
+            max-width: 520px;
             margin: 0 auto;
             padding: 20px;
         }
         header {
             text-align: center;
-            padding: 40px 0 30px;
+            padding: 30px 0 20px;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 12px;
+            background: linear-gradient(135deg, #b87333, #cd7f32);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(184, 115, 51, 0.3);
         }
         header h1 {
-            font-size: 2rem;
-            margin-bottom: 8px;
-            background: linear-gradient(90deg, #f39c12, #e74c3c);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            color: #1e3a5f;
+        }
+        header h1 span {
+            color: #b87333;
         }
         header p {
-            color: #8892b0;
-            font-size: 0.95rem;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .stat {
-            text-align: center;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-        }
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #f39c12;
-        }
-        .stat-label {
-            font-size: 0.8rem;
-            color: #8892b0;
-            margin-top: 4px;
-        }
-        .apr-highlight {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(243, 156, 18, 0.2), rgba(231, 76, 60, 0.2));
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        .apr-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #2ecc71;
-        }
-        .apr-label {
-            color: #8892b0;
+            color: #64748b;
             font-size: 0.9rem;
         }
-        .section-title {
-            font-size: 1rem;
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
             margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .apr-card {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
             color: #fff;
+            text-align: center;
+            padding: 28px 24px;
         }
-        .input-group {
-            margin-bottom: 16px;
+        .apr-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #4ade80;
+            line-height: 1;
         }
-        .input-wrapper {
+        .apr-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        .tvl-row {
             display: flex;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
-        .input-wrapper input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 16px;
-            font-size: 1.1rem;
+        .tvl-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+        }
+        .tvl-value {
             color: #fff;
-            outline: none;
-        }
-        .input-wrapper input::placeholder {
-            color: #5a6a8a;
-        }
-        .max-btn {
-            background: rgba(243, 156, 18, 0.2);
-            border: none;
-            padding: 16px 20px;
-            color: #f39c12;
-            cursor: pointer;
             font-weight: 600;
-            transition: background 0.2s;
+            font-size: 1.1rem;
         }
-        .max-btn:hover {
-            background: rgba(243, 156, 18, 0.3);
+        .copper-card {
+            background: linear-gradient(135deg, #fef3e2 0%, #fde8d0 100%);
+            border: 1px solid #f5d5b5;
         }
-        .balance-row {
+        .copper-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .copper-title {
             font-size: 0.85rem;
-            color: #8892b0;
-            margin-top: 8px;
+            font-weight: 600;
+            color: #92400e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .copper-link {
+            font-size: 0.8rem;
+            color: #b87333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .copper-link:hover {
+            text-decoration: underline;
+        }
+        .copper-price {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .copper-price-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        .copper-price-change {
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .copper-price-change.up {
+            background: rgba(34, 197, 94, 0.15);
+            color: #16a34a;
+        }
+        .copper-price-change.down {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+        }
+        .copper-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(146, 64, 14, 0.15);
+        }
+        .copper-stat {
+            text-align: center;
+        }
+        .copper-stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+        .copper-stat-label {
+            font-size: 0.75rem;
+            color: #92400e;
+            margin-top: 2px;
+        }
+        .why-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .why-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .why-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .why-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 4px;
+        }
+        .why-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .connect-prompt {
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .connect-prompt p {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
         }
         .btn {
             width: 100%;
@@ -140,33 +216,99 @@
             margin-bottom: 12px;
         }
         .btn-primary {
-            background: linear-gradient(90deg, #f39c12, #e74c3c);
+            background: linear-gradient(135deg, #b87333, #cd7f32);
             color: #fff;
         }
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
+            box-shadow: 0 4px 20px rgba(184, 115, 51, 0.4);
         }
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: #f1f5f9;
+            color: #1e3a5f;
+            border: 1px solid #e2e8f0;
         }
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: #e2e8f0;
         }
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        .btn-group {
+        .section-title {
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-wrapper {
+            display: flex;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 16px;
+            font-size: 1.1rem;
+            color: #1e3a5f;
+            outline: none;
+        }
+        .input-wrapper input::placeholder {
+            color: #94a3b8;
+        }
+        .max-btn {
+            background: rgba(184, 115, 51, 0.1);
+            border: none;
+            padding: 16px 20px;
+            color: #b87333;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .max-btn:hover {
+            background: rgba(184, 115, 51, 0.2);
+        }
+        .balance-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+        .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
         }
         .pending-rewards {
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px solid rgba(46, 204, 113, 0.3);
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
             border-radius: 12px;
             padding: 16px;
             text-align: center;
@@ -175,35 +317,11 @@
         .pending-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #2ecc71;
+            color: #16a34a;
         }
         .pending-label {
             font-size: 0.85rem;
-            color: #8892b0;
-        }
-        .connect-prompt {
-            text-align: center;
-            padding: 40px 20px;
-        }
-        .connect-prompt p {
-            color: #8892b0;
-            margin-bottom: 20px;
-        }
-        .links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-        .links a {
-            color: #8892b0;
-            text-decoration: none;
-            font-size: 0.85rem;
-            transition: color 0.2s;
-        }
-        .links a:hover {
-            color: #f39c12;
+            color: #64748b;
         }
         .status {
             text-align: center;
@@ -213,25 +331,56 @@
             font-size: 0.9rem;
         }
         .status.success {
-            background: rgba(46, 204, 113, 0.2);
-            color: #2ecc71;
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
         }
         .status.error {
-            background: rgba(231, 76, 60, 0.2);
-            color: #e74c3c;
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
         }
         .status.pending {
-            background: rgba(243, 156, 18, 0.2);
-            color: #f39c12;
+            background: rgba(184, 115, 51, 0.1);
+            color: #b87333;
         }
         .hidden {
             display: none;
+        }
+        .links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .links a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+        .links a:hover {
+            color: #b87333;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer a {
+            color: #b87333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .footer a:hover {
+            text-decoration: underline;
         }
         @media (max-width: 480px) {
             .container {
                 padding: 12px;
             }
-            .stats-grid {
+            .why-section {
                 grid-template-columns: 1fr;
             }
         }
@@ -240,42 +389,87 @@
 <body>
     <div class="container">
         <header>
-            <h1>TCu29 Farm</h1>
-            <p>Stake TCu29/USDT LP → Earn USDT</p>
+            <div class="logo">TCu</div>
+            <h1>TCu29 <span>Farm</span></h1>
+            <p>Stake LP Tokens - Earn Real Yield</p>
         </header>
 
-        <div class="card">
-            <div class="apr-highlight">
-                <div class="apr-value" id="apr">---%</div>
-                <div class="apr-label">Current APR</div>
+        <div class="card apr-card">
+            <div class="apr-value" id="apr">---%</div>
+            <div class="apr-label">Annual Percentage Rate</div>
+            <div class="tvl-row">
+                <span class="tvl-label">Total Value Locked:</span>
+                <span class="tvl-value" id="tvl">$---</span>
             </div>
-            <div class="stats-grid">
-                <div class="stat">
-                    <div class="stat-value" id="tvl">$---</div>
-                    <div class="stat-label">Total Value Locked</div>
+        </div>
+
+        <div class="card copper-card">
+            <div class="copper-header">
+                <span class="copper-title">Copper Market</span>
+                <a href="https://www.google.com/finance/quote/HGW00:COMEX" target="_blank" class="copper-link">
+                    Live Chart
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 17L17 7M17 7H7M17 7V17"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="copper-price">
+                <span class="copper-price-value" id="copper-price">$4.21</span>
+                <span class="copper-price-change up" id="copper-change">+23% YTD</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #78350f; line-height: 1.5;">
+                Copper demand is surging from AI data centers and EV production. TCu29 tokens are backed 1:1 by physical copper reserves.
+            </p>
+            <div class="copper-stats">
+                <div class="copper-stat">
+                    <div class="copper-stat-value">16.2M tons</div>
+                    <div class="copper-stat-label">2030 Supply Deficit</div>
                 </div>
-                <div class="stat">
-                    <div class="stat-value" id="daily-rewards">---</div>
-                    <div class="stat-label">USDT / Day</div>
+                <div class="copper-stat">
+                    <div class="copper-stat-value">3.8x</div>
+                    <div class="copper-stat-label">AI Demand Multiplier</div>
                 </div>
             </div>
         </div>
 
-        <div id="connect-section" class="card">
+        <div class="why-section">
+            <div class="why-item">
+                <div class="why-icon">&#x26A1;</div>
+                <div class="why-title">High Yield</div>
+                <div class="why-desc">Earn USDT rewards on your staked LP position</div>
+            </div>
+            <div class="why-item">
+                <div class="why-icon">&#x1F3AF;</div>
+                <div class="why-title">Asset-Backed</div>
+                <div class="why-desc">TCu29 is backed by real physical copper</div>
+            </div>
+            <div class="why-item">
+                <div class="why-icon">&#x1F512;</div>
+                <div class="why-title">Verified</div>
+                <div class="why-desc">Contract verified on BSCScan</div>
+            </div>
+            <div class="why-item">
+                <div class="why-icon">&#x1F4CA;</div>
+                <div class="why-title">Transparent</div>
+                <div class="why-desc">On-chain reserves, quarterly audits</div>
+            </div>
+        </div>
+
+        <div id="connect-section" class="card" style="margin-top: 16px;">
             <div class="connect-prompt">
-                <p>Connect your wallet to stake LP tokens and earn USDT rewards</p>
+                <p>Connect your wallet to stake TCu29/USDT LP tokens</p>
                 <button class="btn btn-primary" id="connect-btn">Connect Wallet</button>
             </div>
         </div>
 
-        <div id="stake-section" class="card hidden">
+        <div id="stake-section" class="card hidden" style="margin-top: 16px;">
             <div id="status-msg" class="status hidden"></div>
 
             <div class="pending-rewards">
                 <div class="pending-value" id="pending-rewards">0.0000 USDT</div>
                 <div class="pending-label">Pending Rewards</div>
             </div>
-            <button class="btn btn-secondary" id="harvest-btn">Harvest Rewards</button>
+            <button class="btn btn-primary" id="harvest-btn">Harvest Rewards</button>
 
             <h3 class="section-title">Your Position</h3>
             <div class="stats-grid">
@@ -317,9 +511,13 @@
         </div>
 
         <div class="links">
-            <a href="https://pancakeswap.finance/add/0x5b0B5c848a843c83c20dcfa25CDe6E122898a614/0x55d398326f99059fF775485246999027B3197955" target="_blank">Get LP Tokens ↗</a>
-            <a href="https://bscscan.com/address/0x7Fe0EDcCd50A704D78EdA999607CA9B61BCafD0A#code" target="_blank">Contract ↗</a>
-            <a href="https://dexscreener.com/bsc/0xc4a13d9c061bb6fc254cc31d4737c6d5427b3aa8" target="_blank">Chart ↗</a>
+            <a href="https://pancakeswap.finance/add/0x5b0B5c848a843c83c20dcfa25CDe6E122898a614/0x55d398326f99059fF775485246999027B3197955" target="_blank">Get LP Tokens</a>
+            <a href="https://bscscan.com/address/0x7Fe0EDcCd50A704D78EdA999607CA9B61BCafD0A#code" target="_blank">Contract</a>
+            <a href="https://dexscreener.com/bsc/0xc4a13d9c061bb6fc254cc31d4737c6d5427b3aa8" target="_blank">Chart</a>
+        </div>
+
+        <div class="footer">
+            <a href="https://tcu29.io" target="_blank">Learn more at TCu29.io</a>
         </div>
     </div>
 
@@ -446,7 +644,6 @@
 
                 // Update UI
                 document.getElementById('tvl').textContent = '$' + formatNumber(ethers.formatUnits(tvl, 18), 2);
-                document.getElementById('daily-rewards').textContent = formatNumber(ethers.formatUnits(rewardsPerDay, 18), 2);
                 document.getElementById('apr').textContent = formatNumber(ethers.formatUnits(apr, 18), 0) + '%';
 
             } catch (error) {
