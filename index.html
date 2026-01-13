@@ -160,31 +160,48 @@
             color: #92400e;
             margin-top: 2px;
         }
-        .copper-chart {
+        .chart-preview {
+            display: block;
             margin-top: 12px;
             border-radius: 8px;
             overflow: hidden;
             background: #fff;
-        }
-        .copper-chart iframe {
-            width: 100%;
-            height: 200px;
-            border: none;
-        }
-        .chart-link {
-            display: block;
-            text-align: center;
-            padding: 12px;
-            background: #fff;
-            border-radius: 8px;
-            color: #b87333;
             text-decoration: none;
+            position: relative;
+            min-height: 80px;
+        }
+        .chart-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .chart-preview .chart-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            gap: 8px;
+            color: #b87333;
+            font-weight: 500;
+        }
+        .chart-preview .chart-fallback span:first-child {
+            font-size: 2rem;
+        }
+        .chart-preview .chart-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(184, 115, 51, 0.9));
+            color: #fff;
+            text-align: center;
+            padding: 16px 12px 12px;
             font-weight: 500;
             font-size: 0.9rem;
-            margin-top: 12px;
         }
-        .chart-link:hover {
-            background: #fef3e2;
+        .chart-preview:hover .chart-overlay {
+            background: linear-gradient(transparent, rgba(184, 115, 51, 1));
         }
         .why-section {
             display: grid;
@@ -435,15 +452,13 @@
                 <span class="copper-price-value" id="copper-price">$---.--</span>
                 <span class="copper-price-change up" id="copper-change">per lb</span>
             </div>
-            <div class="copper-chart">
-                <!-- TradingView Widget BEGIN -->
-                <div class="tradingview-widget-container">
-                    <div id="tradingview-widget"></div>
+            <a href="https://www.google.com/finance/quote/HGW00:COMEX?hl=en" target="_blank" class="chart-preview">
+                <img src="https://www.gstatic.com/finance/chart/HGW00_COMEX_1Y.png" alt="Copper Price Chart" onerror="this.style.display='none'; this.parentElement.querySelector('.chart-fallback').style.display='flex';">
+                <div class="chart-fallback" style="display:none;">
+                    <span>📈</span>
+                    <span>View 1-Year Copper Chart</span>
                 </div>
-                <!-- TradingView Widget END -->
-            </div>
-            <a href="https://www.google.com/finance/quote/HGW00:COMEX?hl=en" target="_blank" class="chart-link">
-                View Full Chart on Google Finance →
+                <div class="chart-overlay">View Live Chart →</div>
             </a>
         </div>
 
@@ -839,28 +854,6 @@
 
         // Start
         init();
-
-        // TradingView Widget
-        function loadTradingViewWidget() {
-            const script = document.createElement('script');
-            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-            script.async = true;
-            script.innerHTML = JSON.stringify({
-                "symbol": "COMEX:HG1!",
-                "width": "100%",
-                "height": "200",
-                "locale": "en",
-                "dateRange": "12M",
-                "colorTheme": "light",
-                "isTransparent": true,
-                "autosize": true,
-                "largeChartUrl": "https://www.google.com/finance/quote/HGW00:COMEX?hl=en",
-                "noTimeScale": false,
-                "chartOnly": true
-            });
-            document.getElementById('tradingview-widget').appendChild(script);
-        }
-        loadTradingViewWidget();
     </script>
 </body>
 </html>
