@@ -169,16 +169,8 @@
         }
         .price-chart-container canvas {
             width: 100%;
-            height: 120px;
+            height: 160px;
             display: block;
-        }
-        .chart-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: #92400e;
-            margin-top: 4px;
-            opacity: 0.7;
         }
         .why-section {
             display: grid;
@@ -430,11 +422,7 @@
                 <span class="copper-price-change up" id="copper-change">per lb</span>
             </div>
             <div class="price-chart-container">
-                <canvas id="price-chart" width="400" height="120"></canvas>
-                <div class="chart-labels">
-                    <span id="chart-start-date">--</span>
-                    <span id="chart-end-date">--</span>
-                </div>
+                <canvas id="price-chart" width="400" height="160"></canvas>
             </div>
         </div>
 
@@ -619,7 +607,7 @@
 
             const width = rect.width;
             const height = rect.height;
-            const padding = { top: 10, right: 10, bottom: 10, left: 10 };
+            const padding = { top: 15, right: 15, bottom: 25, left: 45 };
 
             // Convert prices to numbers
             const priceData = prices.map(p => parseFloat(ethers.formatUnits(p, 18)));
@@ -628,23 +616,74 @@
             if (priceData.length < 2) return;
 
             // Find min/max for scaling
-            const minPrice = Math.min(...priceData) * 0.995;
-            const maxPrice = Math.max(...priceData) * 1.005;
-            const priceRange = maxPrice - minPrice || 1;
+            const minPrice = Math.min(...priceData) * 0.998;
+            const maxPrice = Math.max(...priceData) * 1.002;
+            const priceRange = maxPrice - minPrice || 0.1;
 
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
 
-            // Draw gradient background
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // Draw Y-axis labels (dollar amounts)
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.fillStyle = '#92400e';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+
+            const yTicks = 4;
+            for (let i = 0; i <= yTicks; i++) {
+                const price = minPrice + (priceRange * i / yTicks);
+                const y = padding.top + chartHeight - (i / yTicks) * chartHeight;
+                ctx.fillText('$' + price.toFixed(2), padding.left - 5, y);
+
+                // Draw horizontal grid line
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.strokeStyle = 'rgba(146, 64, 14, 0.1)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+
+            // Draw X-axis labels (time marks every 2 hours)
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            const minTime = Math.min(...timeData);
+            const maxTime = Math.max(...timeData);
+            const timeRange = maxTime - minTime || 1;
+            const twoHours = 2 * 60 * 60; // 2 hours in seconds
+
+            // Find time marks at 2-hour intervals
+            const startHour = Math.ceil(minTime / twoHours) * twoHours;
+            for (let t = startHour; t <= maxTime; t += twoHours) {
+                const x = padding.left + ((t - minTime) / timeRange) * chartWidth;
+                if (x >= padding.left && x <= width - padding.right) {
+                    const date = new Date(t * 1000);
+                    const label = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                    ctx.fillStyle = '#92400e';
+                    ctx.fillText(label, x, height - padding.bottom + 5);
+
+                    // Draw vertical grid line
+                    ctx.beginPath();
+                    ctx.moveTo(x, padding.top);
+                    ctx.lineTo(x, height - padding.bottom);
+                    ctx.strokeStyle = 'rgba(146, 64, 14, 0.1)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+            }
+
+            // Draw gradient background for chart area
             const gradient = ctx.createLinearGradient(0, padding.top, 0, height - padding.bottom);
             gradient.addColorStop(0, 'rgba(184, 115, 51, 0.15)');
             gradient.addColorStop(1, 'rgba(184, 115, 51, 0.02)');
 
             // Calculate points
-            const chartWidth = width - padding.left - padding.right;
-            const chartHeight = height - padding.top - padding.bottom;
             const points = priceData.map((price, i) => ({
-                x: padding.left + (i / (priceData.length - 1)) * chartWidth,
+                x: padding.left + ((timeData[i] - minTime) / timeRange) * chartWidth,
                 y: padding.top + chartHeight - ((price - minPrice) / priceRange) * chartHeight
             }));
 
@@ -676,28 +715,24 @@
             ctx.strokeStyle = 'rgba(184, 115, 51, 0.3)';
             ctx.lineWidth = 2;
             ctx.stroke();
-
-            // Update date labels
-            if (timeData.length > 0) {
-                const startDate = new Date(timeData[0] * 1000);
-                const endDate = new Date(timeData[timeData.length - 1] * 1000);
-                document.getElementById('chart-start-date').textContent = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                document.getElementById('chart-end-date').textContent = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            }
         }
 
         // Connect wallet
-        connectBtn.addEventListener('click', async () => {
+        async function connectWallet() {
             try {
                 if (!window.ethereum) {
                     showStatus('Please install MetaMask or another Web3 wallet', 'error');
                     return;
                 }
 
-                provider = new ethers.BrowserProvider(window.ethereum);
+                // Request account access first
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (!accounts || accounts.length === 0) {
+                    showStatus('No accounts found. Please unlock your wallet.', 'error');
+                    return;
+                }
 
-                // Request account access
-                await provider.send("eth_requestAccounts", []);
+                provider = new ethers.BrowserProvider(window.ethereum);
 
                 // Check network (BSC = 56)
                 const network = await provider.getNetwork();
@@ -707,6 +742,9 @@
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: '0x38' }],
                         });
+                        // Wait for network switch to complete
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        // Reinitialize provider after network switch
                         provider = new ethers.BrowserProvider(window.ethereum);
                     } catch (switchError) {
                         showStatus('Please switch to BSC network', 'error');
@@ -722,18 +760,42 @@
                 lpToken = new ethers.Contract(LP_TOKEN_ADDRESS, LP_ABI, signer);
                 usdt = new ethers.Contract(USDT_ADDRESS, ERC20_ABI, signer);
 
-                // Update UI
+                // Update UI - ensure sections toggle correctly
                 connectSection.classList.add('hidden');
                 stakeSection.classList.remove('hidden');
 
+                // Update user info immediately
                 await updateUserInfo();
-                setInterval(updateUserInfo, 10000);
+
+                // Start periodic updates if not already started
+                if (!window.userInfoInterval) {
+                    window.userInfoInterval = setInterval(updateUserInfo, 10000);
+                }
 
             } catch (error) {
                 console.error(error);
                 showStatus('Failed to connect: ' + error.message, 'error');
             }
-        });
+        }
+
+        connectBtn.addEventListener('click', connectWallet);
+
+        // Auto-connect if previously connected
+        async function autoConnect() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts && accounts.length > 0) {
+                        await connectWallet();
+                    }
+                } catch (e) {
+                    console.log('Auto-connect not available');
+                }
+            }
+        }
+
+        // Try auto-connect after page loads
+        setTimeout(autoConnect, 1000);
 
         // Update farm statistics
         async function updateFarmStats() {
