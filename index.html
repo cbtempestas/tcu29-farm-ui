@@ -877,15 +877,15 @@
                 const amountWei = ethers.parseUnits(amount, 18);
 
                 // Check allowance
-                const allowance = await lpToken.allowance(userAddress, FARM_ADDRESS);
+                const allowance = await retryTransaction(() => lpToken.allowance(userAddress, FARM_ADDRESS));
                 if (allowance < amountWei) {
                     showStatus('Approving LP tokens...', 'pending');
-                    const approveTx = await lpToken.approve(FARM_ADDRESS, amountWei);
+                    const approveTx = await retryTransaction(() => lpToken.approve(FARM_ADDRESS, amountWei));
                     await approveTx.wait();
                 }
 
                 showStatus('Depositing...', 'pending');
-                const tx = await farm.deposit(0, amountWei);
+                const tx = await retryTransaction(() => farm.deposit(0, amountWei));
                 await tx.wait();
 
                 showStatus('Deposit successful!', 'success');
@@ -895,7 +895,7 @@
 
             } catch (error) {
                 console.error(error);
-                showStatus('Deposit failed: ' + (error.reason || error.message), 'error');
+                showStatus('Deposit failed: ' + formatError(error), 'error');
             }
         });
 
@@ -911,7 +911,7 @@
                 const amountWei = ethers.parseUnits(amount, 18);
 
                 showStatus('Withdrawing...', 'pending');
-                const tx = await farm.withdraw(0, amountWei);
+                const tx = await retryTransaction(() => farm.withdraw(0, amountWei));
                 await tx.wait();
 
                 showStatus('Withdraw successful!', 'success');
@@ -921,7 +921,7 @@
 
             } catch (error) {
                 console.error(error);
-                showStatus('Withdraw failed: ' + (error.reason || error.message), 'error');
+                showStatus('Withdraw failed: ' + formatError(error), 'error');
             }
         });
 
@@ -929,7 +929,7 @@
         document.getElementById('harvest-btn').addEventListener('click', async () => {
             try {
                 showStatus('Harvesting rewards...', 'pending');
-                const tx = await farm.harvest(0);
+                const tx = await retryTransaction(() => farm.harvest(0));
                 await tx.wait();
 
                 showStatus('Harvest successful!', 'success');
@@ -937,7 +937,7 @@
 
             } catch (error) {
                 console.error(error);
-                showStatus('Harvest failed: ' + (error.reason || error.message), 'error');
+                showStatus('Harvest failed: ' + formatError(error), 'error');
             }
         });
 
@@ -953,6 +953,36 @@
                 document.getElementById('withdraw-amount').value = ethers.formatUnits(window.userStaked, 18);
             }
         });
+
+        // Retry helper for rate-limited transactions
+        async function retryTransaction(fn, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    const isRateLimit = error.message?.includes('rate limit') ||
+                                       error.message?.includes('Rate limit') ||
+                                       error.code === -32603;
+                    if (isRateLimit && i < maxRetries - 1) {
+                        showStatus(`Rate limited, retrying in ${(i + 1) * 2}s...`, 'pending');
+                        await new Promise(r => setTimeout(r, (i + 1) * 2000));
+                        continue;
+                    }
+                    throw error;
+                }
+            }
+        }
+
+        // Format error message for display
+        function formatError(error) {
+            if (error.message?.includes('rate limit') || error.message?.includes('Rate limit')) {
+                return 'RPC rate limited. Please wait a moment and try again.';
+            }
+            if (error.message?.includes('user rejected')) {
+                return 'Transaction cancelled by user.';
+            }
+            return error.reason || error.shortMessage || error.message || 'Unknown error';
+        }
 
         // Helpers
         function showStatus(message, type) {
